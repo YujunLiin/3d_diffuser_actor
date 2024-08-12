@@ -1,0 +1,93 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Debug main_trajectory.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main_trajectory.py",
+            "console": "integratedTerminal",
+            "env": {
+                "LOCAL_RANK": "0",
+                "RANK": "0",
+                "WORLD_SIZE": "1",
+                "MASTER_ADDR": "localhost",
+                "MASTER_PORT": "29500",
+                "CUDA_LAUNCH_BLOCKING": "1"
+            },
+            "args": [
+                "--tasks", "put_groceries_in_cupboard", "put_item_in_drawer", "put_money_in_safe", 
+                "reach_and_drag", "slide_block_to_color_target", "stack_blocks", 
+                "stack_cups", "sweep_to_dustpan_of_size", "turn_tap",
+                "--dataset", "data/peract/Peract_packaged/train",
+                "--valset", "data/peract/Peract_packaged/val",
+                "--instructions", "instructions/peract/instructions.pkl",
+                "--gripper_loc_bounds", "tasks/18_peract_tasks_location_bounds.json",
+                "--num_workers", "1",
+                "--train_iters", "600000",
+                "--embedding_dim", "120",
+                "--use_instruction", "1",
+                "--rotation_parametrization", "6D",
+                "--diffusion_timesteps", "100",
+                "--val_freq", "4000",
+                "--dense_interpolation", "1",
+                "--interpolation_length", "2",
+                "--exp_log_dir", "Actor_18Peract_100Demo_multitask",
+                "--batch_size", "8",
+                "--batch_size_val", "14",
+                "--cache_size", "600",
+                "--cache_size_val", "0",
+                "--keypose_only", "1",
+                "--variations", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95", "96", "97", "98", "99", "100",
+                "--lr", "1e-4",
+                "--num_history", "3",
+                "--cameras", "left_shoulder", "right_shoulder", "wrist", "front",
+                "--max_episodes_per_task", "-1",
+                "--quaternion_format", "xyzw",
+                "--run_log_dir", "diffusion_multitask-C120-B8-lr1e-4-DI1-2-H3-DT100"
+            ]
+        },
+        {
+            "name": "Python: Debug evaluate_policy.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/online_evaluation_rlbench/evaluate_policy.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--tasks", "close_jar", 
+                "--checkpoint", "train_logs/diffuser_actor_peract.pth",
+                "--diffusion_timesteps", "100",
+                "--fps_subsampling_factor", "5",
+                "--lang_enhanced", "0",
+                "--relative_action", "0",
+                "--num_history", "3",
+                "--test_model", "3d_diffuser_actor",
+                "--cameras", "left_shoulder,right_shoulder,wrist,front",
+                "--verbose", "1",
+                "--action_dim", "8",
+                "--collision_checking", "0",
+                "--predict_trajectory", "1",
+                "--embedding_dim", "120",
+                "--rotation_parametrization", "6D",
+                "--single_task_gripper_loc_bounds", "0",
+                "--data_dir", "./data/peract/raw/test/",
+                "--num_episodes", "100",
+                "--output_file", "eval_logs/3d_diffuser_actor/seed0/close_jar.json",
+                "--use_instruction", "1",
+                "--instructions", "instructions/peract/instructions.pkl",
+                "--variations", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60",
+                "--max_tries", "2",
+                "--max_steps", "25",
+                "--seed", "0",
+                "--gripper_loc_bounds_file", "tasks/18_peract_tasks_location_bounds.json",
+                "--gripper_loc_bounds_buffer", "0.04",
+                "--quaternion_format", "wxyz",
+                "--interpolation_length", "2",
+                "--dense_interpolation", "1"
+            ],
+            "env": {
+                "CUDA_LAUNCH_BLOCKING": "1"
+            }
+        }
+    ]
+}

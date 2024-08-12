@@ -10,7 +10,7 @@ num_history=3
 diffusion_timesteps=100
 B=8
 C=120
-ngpus=6
+ngpus=1
 quaternion_format=xyzw
 
 CUDA_LAUNCH_BLOCKING=1 torchrun --nproc_per_node $ngpus --master_port $RANDOM \

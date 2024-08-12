@@ -145,7 +145,7 @@ class BaseTrainTester:
         # Training loop
         iter_loader = iter(train_loader)
         model.train()
-        for step_id in trange(start_iter, self.args.train_iters):
+        for step_id in range(start_iter, self.args.train_iters):
             try:
                 sample = next(iter_loader)
             except StopIteration:

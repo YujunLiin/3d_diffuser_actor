@@ -375,6 +375,9 @@ class DiffuserActor(nn.Module):
             gt_trajectory[..., :3], noise[..., :3],
             timesteps
         )
+        # print(gt_trajectory[..., :3].shape, noise[..., :3].shape,
+        #     timesteps.shape,pos.shape)
+        # print(timesteps,noise[..., :3])
         rot = self.rotation_noise_scheduler.add_noise(
             gt_trajectory[..., 3:9], noise[..., 3:9],
             timesteps
