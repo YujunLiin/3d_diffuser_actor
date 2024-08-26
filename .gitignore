@@ -33,5 +33,5 @@ PeRep/
 RLBench/
 instructions.zip
 test.ipynb
-.vscode/launch.json
-.vscode/settings.json
+environment_mine.yaml
+environment2.yaml

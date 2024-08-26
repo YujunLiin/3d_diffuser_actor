@@ -1,6 +1,7 @@
 {
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Debug main_trajectory.py",
             "type": "python",
@@ -54,7 +55,7 @@
             "program": "${workspaceFolder}/online_evaluation_rlbench/evaluate_policy.py",
             "console": "integratedTerminal",
             "args": [
-                "--tasks", "close_jar", 
+                "--tasks", "stack_blocks", 
                 "--checkpoint", "train_logs/diffuser_actor_peract.pth",
                 "--diffusion_timesteps", "100",
                 "--fps_subsampling_factor", "5",

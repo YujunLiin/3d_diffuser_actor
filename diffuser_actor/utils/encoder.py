@@ -240,7 +240,6 @@ class Encoder(nn.Module):
         # context_pos (B, Np, F, 2)
         # outputs of analogous shape, with smaller Np
         npts, bs, ch = context_features.shape
-        print("number of points:", npts)
 
         # Sample points with FPS
         sampled_inds = dgl_geo.farthest_point_sampler(
@@ -267,7 +266,6 @@ class Encoder(nn.Module):
         sampled_context_pos = torch.gather(
             context_pos, 1, expanded_sampled_inds
         )
-        print("sampled number of points:", sampled_context_features.shape[0])
         return sampled_context_features, sampled_context_pos
 
     def vision_language_attention(self, feats, instr_feats):
