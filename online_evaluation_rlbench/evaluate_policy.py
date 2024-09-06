@@ -70,6 +70,8 @@ class Arguments(tap.Tap):
     use_instruction: int = 1
     rotation_parametrization: str = '6D'
     quaternion_format: str = 'xyzw'
+    
+    modality: str="2D"
 
 
 def load_models(args):
@@ -103,6 +105,7 @@ def load_models(args):
             nhist=args.num_history,
             relative=bool(args.relative_action),
             lang_enhanced=bool(args.lang_enhanced),
+            modality=args.modality
         )
     elif args.test_model == "act3d":
         model = Act3D(

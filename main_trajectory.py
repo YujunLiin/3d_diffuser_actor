@@ -77,6 +77,7 @@ class Arguments(tap.Tap):
     relative_action: int = 0
     lang_enhanced: int = 0
     fps_subsampling_factor: int = 5
+    modality: str='2D'
 
 
 class TrainTester(BaseTrainTester):
@@ -155,7 +156,8 @@ class TrainTester(BaseTrainTester):
             diffusion_timesteps=self.args.diffusion_timesteps,
             nhist=self.args.num_history,
             relative=bool(self.args.relative_action),
-            lang_enhanced=bool(self.args.lang_enhanced)
+            lang_enhanced=bool(self.args.lang_enhanced),
+            modality=self.args.modality
         )
         print("Model parameters:", count_parameters(_model))
 

@@ -1,7 +1,8 @@
 exp=3d_diffuser_actor
 
 tasks=(
-    close_jar insert_onto_square_peg light_bulb_in meat_off_grill open_drawer place_shape_in_shape_sorter place_wine_at_rack_location push_buttons put_groceries_in_cupboard put_item_in_drawer put_money_in_safe reach_and_drag slide_block_to_color_target stack_blocks stack_cups sweep_to_dustpan_of_size turn_tap place_cups
+    #close_jar insert_onto_square_peg light_bulb_in meat_off_grill open_drawer place_shape_in_shape_sorter place_wine_at_rack_location push_buttons put_groceries_in_cupboard put_item_in_drawer put_money_in_safe reach_and_drag slide_block_to_color_target stack_blocks stack_cups sweep_to_dustpan_of_size turn_tap place_cups
+    close_jar slide_block_to_color_target
 )
 data_dir=./data/peract/raw/test/
 num_episodes=100
@@ -17,8 +18,9 @@ fps_subsampling_factor=5
 lang_enhanced=0
 relative_action=0
 seed=0
-checkpoint=train_logs/diffuser_actor_peract.pth
+checkpoint=train_logs/trained_myself/2d_peract_best.pth
 quaternion_format=wxyz
+modality=2D
 
 num_ckpts=${#tasks[@]}
 for ((i=0; i<$num_ckpts; i++)); do
@@ -52,6 +54,7 @@ for ((i=0; i<$num_ckpts; i++)); do
     --gripper_loc_bounds_buffer 0.04 \
     --quaternion_format $quaternion_format \
     --interpolation_length $interpolation_length \
-    --dense_interpolation 1
+    --dense_interpolation 1 \
+    --modality $modality
 done
 

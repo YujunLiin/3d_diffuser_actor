@@ -7,9 +7,11 @@ from torchvision.ops import FeaturePyramidNetwork
 
 from .position_encodings import RotaryPositionEncoding3D
 from .layers import FFWRelativeCrossAttentionModule, ParallelAttention
-from .resnet import load_resnet50, load_resnet18
+from .resnet import load_resnet50, load_resnet18, replace_submodules
 from .clip import load_clip
 
+NUM_CAMERAS=4
+DP_ENCODER="resnet18"
 
 class Encoder(nn.Module):
 
@@ -88,6 +90,37 @@ class Encoder(nn.Module):
             for _ in range(1)
         ])
 
+        ######################################################################
+        # Dict for storing new key models, including 2D, 2.5D, 3D
+
+        # Uncomment these for enabling 2D encoders for each camera
+        # key_model_map=nn.ModuleDict()
+        # key_transform_map=nn.ModuleDict()
+
+        # #2D model for 2D  images only, each camera has its own encoder
+        # for i in range(NUM_CAMERAS):
+        #     model,key_transform_map[f"2D_encoder_{i}"]=load_resnet18(pretrained=False)
+        #     key_model_map[f"2D_encoder_{i}"]=replace_submodules(
+        #         root_module=model,
+        #         predicate=lambda x: isinstance(x,nn.BatchNorm2d),
+        #         func=lambda x: nn.GroupNorm(
+        #             num_groups=x.num_features//16,
+        #             num_channels=x.num_features)
+        #         )
+        
+        # self.key_model_map=key_model_map
+        # self.key_transform_map=key_transform_map
+
+        # When using 2D features only, 3D  point cloud features can either be learned 
+        # from rgb images or be dummy point cloud without useful information
+        self.rgb_to_pcd = nn.Sequential(
+            nn.Linear(3,3),
+            nn.ReLU(),
+            nn.Linear(3,3)
+        )
+
+            
+
     def forward(self):
         return None
 
@@ -127,13 +160,13 @@ class Encoder(nn.Module):
         Compute gripper position features and positional embeddings.
 
         Args:
-            - gripper: (B, npt, 3+)
+            - gripper: (B, nhist, 3+)
             - context_feats: (B, npt, C)
             - context: (B, npt, 3)
 
         Returns:
-            - gripper_feats: (B, npt, F)
-            - gripper_pos: (B, npt, F, 2)
+            - gripper_feats: (B, nhist, F)
+            - gripper_pos: (B, nhist, F, 2)
         """
         # Learnable embedding for gripper
         gripper_feats = gripper_embed.weight.unsqueeze(0).repeat(
@@ -276,3 +309,53 @@ class Encoder(nn.Module):
             seq1_sem_pos=None, seq2_sem_pos=None
         )
         return feats
+
+######################################################################
+    # Add 2D encoder for each camera
+    # def encode_images_2d(self,rgb):
+    #     """
+    #     Computer 2D visual features using different encoder for different camera view,
+    #     batch norm replaced with group norm already,
+    #     (?)Spatial softmax pooling is used to get the final feature instead of global average pooling,
+        
+    #     (!)Without concatenate features together.
+
+    #     Args:
+    #         - rgb: (B, ncam, 3, H, W), pixel intensities
+
+    #     Returns:
+    #         - rgb_feats: [(B, ncam, F)]
+    #     """
+    #     assert rgb.shape[1]==NUM_CAMERAS
+
+    #     rgb_features=[]
+    #     for i in range(NUM_CAMERAS):
+    #         images=rgb[:,i,...] # of shape (B,3,H,W)
+    #         curr_encoder=self.key_model_map[f"2D_encoder_{i}"]
+    #         curr_normalizer=self.key_transform_map[f"2D_encoder_{i}"]
+    #         normalized_images=curr_normalizer(images)
+    #         curr_features=curr_encoder(normalized_images) # of shape (B,1000)
+    #         rgb_features.append(curr_features)
+    #     rgb_features=torch.stack(rgb_features,dim=1) # of shape(B,ncam,1000)
+
+    #     return rgb_features
+
+    # TODO: integrate these image encoding methods to a single function
+    def encode_2D_images(self, rgb):
+        """
+        Compute visual features embeddings only at different scales.
+
+        Args:
+            - rgb: (B, ncam, 3, H, W), pixel intensities
+
+        Returns:
+            - rgb_feats_pyramid: [(B, ncam, F, H_i, W_i)]
+        """
+
+        # Generate point cloud from rgb images
+        rgb=einops.rearrange(rgb,"bt ncam c h w -> bt ncam h w c")
+        pcd=self.rgb_to_pcd(rgb)
+        pcd=einops.rearrange(pcd,"bt ncam h w c -> bt ncam c h w")
+        rgb=einops.rearrange(rgb,"bt ncam h w c -> bt ncam c h w")
+
+        return self.encode_images(rgb,pcd)

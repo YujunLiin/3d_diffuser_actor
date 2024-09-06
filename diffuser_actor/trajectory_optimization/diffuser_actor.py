@@ -39,7 +39,8 @@ class DiffuserActor(nn.Module):
                  diffusion_timesteps=100,
                  nhist=3,
                  relative=False,
-                 lang_enhanced=False):
+                 lang_enhanced=False,
+                 modality='original'):
         super().__init__()
         self._rotation_parametrization = rotation_parametrization
         self._quaternion_format = quaternion_format
@@ -74,23 +75,32 @@ class DiffuserActor(nn.Module):
         self.n_steps = diffusion_timesteps
         self.gripper_loc_bounds = torch.tensor(gripper_loc_bounds)
 
+        self.modality=modality
+
+    
     def encode_inputs(self, visible_rgb, visible_pcd, instruction,
                       curr_gripper):
         # Compute visual features/positional embeddings at different scales
-        rgb_feats_pyramid, pcd_pyramid = self.encoder.encode_images(
-            visible_rgb, visible_pcd
-        )
+        if self.modality=='original':
+            rgb_feats_pyramid, pcd_pyramid = self.encoder.encode_images(
+                visible_rgb, visible_pcd
+                )
+        elif self.modality=='2D':
+            rgb_feats_pyramid, pcd_pyramid = self.encoder.encode_2D_images(visible_rgb)
+            
+
         # Keep only low-res scale
         context_feats = einops.rearrange(
             rgb_feats_pyramid[0],
             "b ncam c h w -> b (ncam h w) c"
-        )
-        context = pcd_pyramid[0]
+        ) #(1,4096,120)
+        context = pcd_pyramid[0] #(1,4096,3)
 
         # Encode instruction (B, 53, F)
         instr_feats = None
         if self.use_instruction:
             instr_feats, _ = self.encoder.encode_instruction(instruction)
+        #instr_feats (1,53,120)
 
         # Cross-attention vision to language
         if self.use_instruction:
@@ -102,9 +112,10 @@ class DiffuserActor(nn.Module):
         # Encode gripper history (B, nhist, F)
         adaln_gripper_feats, _ = self.encoder.encode_curr_gripper(
             curr_gripper, context_feats, context
-        )
+        ) #(1,3,120)
 
         # FPS on visual features (N, B, F) and (B, N, F, 2)
+        # (819,1,120), (1,819,120,2)
         fps_feats, fps_pos = self.encoder.run_fps(
             context_feats.transpose(0, 1),
             self.encoder.relative_pe_layer(context)
@@ -114,7 +125,8 @@ class DiffuserActor(nn.Module):
             instr_feats,  # language features
             adaln_gripper_feats,  # gripper history features
             fps_feats, fps_pos  # sampled visual features
-        )
+        ) 
+
 
     def policy_forward_pass(self, trajectory, timestep, fixed_inputs):
         # Parse inputs
