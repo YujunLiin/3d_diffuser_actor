@@ -1,7 +1,7 @@
 main_dir=Planner_Calvin
 
-dataset=./data/calvin/packaged_ABC_D/training
-valset=./data/calvin/packaged_ABC_D/validation
+dataset=./data/calvin/packaged_debug_ABC_D/training
+valset=./data/calvin/packaged_debug_ABC_D/validation
 
 lr=3e-4
 wd=5e-3
@@ -9,9 +9,9 @@ dense_interpolation=1
 interpolation_length=20
 num_history=3
 diffusion_timesteps=25
-B=30
+B=8
 C=192
-ngpus=6
+ngpus=1
 backbone=clip
 image_size="256,256"
 relative_action=1
@@ -32,13 +32,13 @@ CUDA_LAUNCH_BLOCKING=1 torchrun --nproc_per_node $ngpus --master_port $RANDOM \
     --backbone $backbone \
     --dataset $dataset \
     --valset $valset \
-    --instructions instructions/calvin_task_ABC_D/ \
+    --instructions instructions/calvin_debug_ABC_D/ \
     --gripper_loc_bounds $gripper_loc_bounds \
     --gripper_loc_bounds_buffer $gripper_buffer \
     --image_size $image_size \
     --num_workers 4 \
     --max_episode_length 30 \
-    --train_iters 600000 \
+    --train_iters 30000 \
     --embedding_dim $C \
     --use_instruction 1 \
     --rotation_parametrization 6D \
@@ -68,7 +68,7 @@ CUDA_LAUNCH_BLOCKING=1 torchrun --nproc_per_node $ngpus --master_port $RANDOM \
 
 torchrun --nproc_per_node $ngpus --master_port $RANDOM \
     online_evaluation_calvin/evaluate_policy.py \
-    --calvin_dataset_path calvin/dataset/task_ABC_D \
+    --calvin_dataset_path calvin/dataset/calvin_debug_dataset \
     --calvin_model_path calvin/calvin_models \
     --text_encoder clip \
     --text_max_length 16 \
@@ -76,7 +76,7 @@ torchrun --nproc_per_node $ngpus --master_port $RANDOM \
     --backbone $backbone \
     --gripper_loc_bounds $gripper_loc_bounds \
     --gripper_loc_bounds_buffer $gripper_buffer \
-    --calvin_gripper_loc_bounds calvin/dataset/task_ABC_D/validation/statistics.yaml \
+    --calvin_gripper_loc_bounds calvin/dataset/calvin_debug_dataset/validation/statistics.yaml \
     --embedding_dim $C \
     --action_dim 7 \
     --use_instruction 1 \

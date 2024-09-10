@@ -2,6 +2,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "name": "Python: Debug main_trajectory.py",
             "type": "python",
@@ -89,6 +90,59 @@
             "env": {
                 "CUDA_LAUNCH_BLOCKING": "1"
             }
+        },
+        {
+            "name": "Python: Debug main_trajectory_calvin.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main_trajectory_calvin.py",
+            "console": "integratedTerminal",
+            "env": {
+                "LOCAL_RANK": "0",
+                "RANK": "0",
+                "WORLD_SIZE": "1",
+                "MASTER_ADDR": "localhost",
+                "MASTER_PORT": "29500",
+                "CUDA_LAUNCH_BLOCKING": "1"
+            },
+            "args": [
+                "--tasks", "A", "B", "C", "D",
+                "--backbone", "clip",
+                "--dataset", "./data/calvin/packaged_debug_ABC_D/training",
+                "--valset", "./data/calvin/packaged_debug_ABC_D/validation",
+                "--instructions", "instructions/calvin_debug_ABC_D/",
+                "--gripper_loc_bounds", "tasks/calvin_rel_traj_location_bounds_task_ABC_D.json",
+                "--gripper_loc_bounds_buffer", "0.01",
+                "--image_size", "256,256",
+                "--num_workers", "4",
+                "--max_episode_length", "30",
+                "--train_iters", "30",
+                "--embedding_dim", "192",
+                "--use_instruction", "1",
+                "--rotation_parametrization", "6D",
+                "--diffusion_timesteps", "25",
+                "--val_freq", "5000",
+                "--val_iters", "2",
+                "--dense_interpolation", "1",
+                "--interpolation_length", "20",
+                "--exp_log_dir", "Planner_Calvin",
+                "--batch_size", "16",
+                "--batch_size_val", "3",
+                "--cache_size", "0",
+                "--cache_size_val", "0",
+                "--keypose_only", "0",
+                "--variations", "0",
+                "--lr", "3e-4",
+                "--wd", "5e-3",
+                "--num_history", "3",
+                "--cameras", "front", "wrist",
+                "--max_episodes_per_task", "-1",
+                "--relative_action", "1",
+                "--fps_subsampling_factor", "3",
+                "--lang_enhanced", "1",
+                "--quaternion_format", "wxyz",
+                "--run_log_dir", "diffusion_taskABC_D-C192-B16-lr3e-4-DI1-20-H3-DT25-backboneclip-S256,256-R1-wd5e-3"
+            ]
         }
     ]
 }
