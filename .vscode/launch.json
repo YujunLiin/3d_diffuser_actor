@@ -31,7 +31,7 @@
                 "--dense_interpolation", "1",
                 "--interpolation_length", "2",
                 "--exp_log_dir", "Actor_18Peract_100Demo_multitask",
-                "--batch_size", "8",
+                "--batch_size", "1",
                 "--batch_size_val", "14",
                 "--cache_size", "600",
                 "--cache_size_val", "0",
@@ -43,7 +43,7 @@
                 "--max_episodes_per_task", "-1",
                 "--quaternion_format", "xyzw",
                 "--run_log_dir", "diffusion_multitask-C120-B8-lr1e-4-DI1-2-H3-DT100",
-                "--modality", "2D"
+                "--modality", "3D"
             ]
         },
         {
@@ -53,8 +53,8 @@
             "program": "${workspaceFolder}/online_evaluation_rlbench/evaluate_policy.py",
             "console": "integratedTerminal",
             "args": [
-                "--tasks", "slide_block_to_color_target", 
-                "--checkpoint", "train_logs/trained_myself/2d_peract_best.pth",
+                "--tasks", "place_cups", 
+                "--checkpoint", "train_logs/trained_myself/original/b8_60k_wine+place_cups/best.pth",
                 "--diffusion_timesteps", "100",
                 "--fps_subsampling_factor", "5",
                 "--lang_enhanced", "0",
@@ -69,9 +69,9 @@
                 "--embedding_dim", "120",
                 "--rotation_parametrization", "6D",
                 "--single_task_gripper_loc_bounds", "0",
-                "--data_dir", "./data/peract/raw/test/",
+                "--data_dir", "./data/peract/raw/test_3d/",
                 "--num_episodes", "100",
-                "--output_file", "eval_logs/3d_diffuser_actor/2D/seed3/slide_block_to_color_target.json",
+                "--output_file", "eval_logs/debug/3d_diffuser_actor/origin/b8_60k/place_cups.json",
                 "--use_instruction", "1",
                 "--instructions", "instructions/peract/instructions.pkl",
                 "--variations", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60",
@@ -83,7 +83,7 @@
                 "--quaternion_format", "wxyz",
                 "--interpolation_length", "2",
                 "--dense_interpolation", "1",
-                "--modality", "2D"
+                "--modality", "original"
             ],
             "env": {
                 "CUDA_LAUNCH_BLOCKING": "1"

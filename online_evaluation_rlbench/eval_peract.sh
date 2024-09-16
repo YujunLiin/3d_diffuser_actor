@@ -1,10 +1,10 @@
-exp=3d_diffuser_actor
+exp=3d_diffuser_actor_original_b8_60k_wine+place_cups
 
 tasks=(
     #close_jar insert_onto_square_peg light_bulb_in meat_off_grill open_drawer place_shape_in_shape_sorter place_wine_at_rack_location push_buttons put_groceries_in_cupboard put_item_in_drawer put_money_in_safe reach_and_drag slide_block_to_color_target stack_blocks stack_cups sweep_to_dustpan_of_size turn_tap place_cups
-    close_jar slide_block_to_color_target
+    place_wine_at_rack_location
 )
-data_dir=./data/peract/raw/test/
+data_dir=./data/peract/raw/test_3d/
 num_episodes=100
 gripper_loc_bounds_file=tasks/18_peract_tasks_location_bounds.json
 use_instruction=1
@@ -18,9 +18,12 @@ fps_subsampling_factor=5
 lang_enhanced=0
 relative_action=0
 seed=0
-checkpoint=train_logs/trained_myself/2d_peract_best.pth
+#ORIGINAL
+#checkpoint=train_logs/trained_myself/original/b8_60k_wine+place_cups/best.pth
+#3D
+checkpoint=train_logs/trained_myself/3d/wine+place_cups/best.pth
 quaternion_format=wxyz
-modality=2D
+modality=orginal
 
 num_ckpts=${#tasks[@]}
 for ((i=0; i<$num_ckpts; i++)); do

@@ -3,7 +3,7 @@
 import torch
 from torchvision import transforms
 from typing import Type, Union, List, Any, Callable
-from torchvision.models.resnet import _resnet, BasicBlock, Bottleneck, ResNet
+from torchvision.models.resnet import _resnet, BasicBlock, Bottleneck, ResNet, resnet18
 import torch.nn as nn
 
 
@@ -91,3 +91,44 @@ def replace_submodules(
                      if predicate(m)]
     assert len(bn_list)==0
     return root_module
+
+
+class SpatialSoftmax(nn.Module):
+    def __init__(self,height,width,channel):
+        super().__init__()
+        self.height=height
+        self.width=width
+        self.channel=channel
+        self.softmax=nn.Softmax(dim=-1)
+    
+    def forward(self,x):
+        x=x.view(-1,self.channel,self.height*self.width)
+        x=self.softmax(x)
+        x=x.view(-1,self.channel,self.height,self.width)
+        return x
+
+        
+class ResNet18_custom(nn.Module):
+    def __init__(self, out_channels=60, spatial_softmax_size=(32,32,512),pretrained=True):
+        super().__init__()
+        self.out_channels=out_channels
+        net=resnet18(pretrained=pretrained)
+        self.normalize=nn.functional.normalize
+        self.backbone=nn.Sequential(*list(net.children())[:-2])
+        # upsample from 8*8 to 32*32
+        self.upsample=nn.Upsample(scale_factor=4, mode='bilinear', align_corners=False)
+        # dimensionality stays the same
+        self.spatial_softmax=SpatialSoftmax(*spatial_softmax_size)
+        self.fc=nn.Linear(512,out_channels)
+
+    def forward(self,x):
+        x=self.normalize(x)
+        x=self.backbone(x)
+        x=self.upsample(x)
+        x=self.spatial_softmax(x)
+        x=x.view(-1,512)
+        x=self.fc(x)
+        x=x.view(-1,32,32,self.out_channels)
+        return x
+
+        

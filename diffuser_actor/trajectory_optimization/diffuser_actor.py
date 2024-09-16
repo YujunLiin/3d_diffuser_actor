@@ -80,27 +80,38 @@ class DiffuserActor(nn.Module):
     
     def encode_inputs(self, visible_rgb, visible_pcd, instruction,
                       curr_gripper):
+        context_feats = None
+        context = None
         # Compute visual features/positional embeddings at different scales
         if self.modality=='original':
             rgb_feats_pyramid, pcd_pyramid = self.encoder.encode_images(
                 visible_rgb, visible_pcd
                 )
+                # Keep only low-res scale
+            context_feats = einops.rearrange(
+                rgb_feats_pyramid[0],
+                "b ncam c h w -> b (ncam h w) c"
+            ) #(1,4096,120)
+            context = pcd_pyramid[0] #(1,4096,3)
         elif self.modality=='2D':
             rgb_feats_pyramid, pcd_pyramid = self.encoder.encode_2D_images(visible_rgb)
+            # Keep only low-res scale
+            context_feats = einops.rearrange(
+                rgb_feats_pyramid[0],
+                "b ncam c h w -> b (ncam h w) c"
+            ) #(1,4096,120)
+            context = pcd_pyramid[0] #(1,4096,3)
+        elif self.modality=='3D':
+            # the name is not rgb feature pyramid, but only for the purpose of consistency with other modality
+            context_feats, context = self.encoder.encode_3d_pd(visible_pcd)
             
-
-        # Keep only low-res scale
-        context_feats = einops.rearrange(
-            rgb_feats_pyramid[0],
-            "b ncam c h w -> b (ncam h w) c"
-        ) #(1,4096,120)
-        context = pcd_pyramid[0] #(1,4096,3)
 
         # Encode instruction (B, 53, F)
         instr_feats = None
         if self.use_instruction:
             instr_feats, _ = self.encoder.encode_instruction(instruction)
         #instr_feats (1,53,120)
+
 
         # Cross-attention vision to language
         if self.use_instruction:

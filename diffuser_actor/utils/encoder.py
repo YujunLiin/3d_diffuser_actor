@@ -7,7 +7,7 @@ from torchvision.ops import FeaturePyramidNetwork
 
 from .position_encodings import RotaryPositionEncoding3D
 from .layers import FFWRelativeCrossAttentionModule, ParallelAttention
-from .resnet import load_resnet50, load_resnet18, replace_submodules
+from .resnet import load_resnet50, load_resnet18, replace_submodules, ResNet18_custom
 from .clip import load_clip
 
 NUM_CAMERAS=4
@@ -118,6 +118,8 @@ class Encoder(nn.Module):
             nn.ReLU(),
             nn.Linear(3,3)
         )
+
+        self.encoder_3d=ResNet18_custom(out_channels=embedding_dim,spatial_softmax_size=(32,32,512),pretrained=True)
 
             
 
@@ -359,3 +361,26 @@ class Encoder(nn.Module):
         rgb=einops.rearrange(rgb,"bt ncam h w c -> bt ncam c h w")
 
         return self.encode_images(rgb,pcd)
+
+    def encode_3d_pd(self,pcd):
+        """
+        Compute 3D point cloud features using 3D encoder
+
+        Args:
+            - pcd: (B, ncam, 3, H, W), positions
+
+        Returns:
+            - context_feats: (B, ncam, F)
+        """
+        num_camera=pcd.shape[1]
+        pcd=einops.rearrange(pcd,"bt ncam c h w -> (bt ncam) c h w")
+        context_feats=self.encoder_3d(pcd)  # of shape (B*ncam,32,32,embedding_dim)
+        feat_h,feat_w=context_feats.shape[-3:-1]
+        context=F.interpolate(
+            pcd,
+            (feat_h,feat_w),
+            mode='bilinear'
+        )
+        context_feats=einops.rearrange(context_feats,"(bt ncam) h w c -> bt (ncam h w) c ",ncam=num_camera)
+        context=einops.rearrange(context,"(bt ncam) c h w -> bt (ncam h w ) c ",ncam=num_camera)
+        return context_feats,context
